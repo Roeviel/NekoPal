@@ -1,5 +1,10 @@
 # 蕴 · 猫娘伴友
 
+**中文** | [English](README.en.md)
+
+> **A local-first desktop companion: she chats with you, teaches herself from Bilibili,
+> and can actually speak** — `edge-tts`, optionally re-voiced with RVC. → [English README](README.en.md)
+
 一个装在你电脑上的猫娘伴友软件：**陪你聊天**、**自己去 B 站看视频学东西**、**把学到的讲给你听**、**能开口说话**。
 
 名字和性格都可以改（`config.json` 里一行配置）。当前默认：**蕴**，清冷、理性、话不多但每句都在点上，称呼你为**同行者**。
@@ -130,6 +135,7 @@ NekoPal\
 ├─ 启动蕴.vbs              # 日常启动，无控制台（双击）
 ├─ 启动蕴-控制台.bat        # 带日志启动，用于排查
 ├─ neko_start.py           # 启动引导（给 vbs 用，不依赖工作目录）
+├─ README.en.md             # 英文说明（给不看中文的人）
 ├─ config.json             # 你的配置（含 API Key，别外传）
 ├─ config.example.json     # 配置模板
 ├─ requirements.txt        # 依赖清单
