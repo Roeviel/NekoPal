@@ -65,7 +65,7 @@ PRESETS: dict[str, dict[str, Any]] = {
     },
 }
 
-_BASE_RULES = """你是 {name}，一个住在电脑里的猫娘伴友。
+_BASE_RULES = """你是 {name}，一个住在电脑里的AI伴友。
 
 # 你是谁
 {tone}

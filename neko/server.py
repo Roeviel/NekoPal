@@ -129,7 +129,7 @@ def scheduler():
     return _scheduler
 
 
-app = FastAPI(title="蕴 · 猫娘伴友", version="0.2.0", lifespan=lifespan)
+app = FastAPI(title="蕴 · AI伴友", version="0.2.0", lifespan=lifespan)
 if WEB_DIR.is_dir():
     app.mount("/static", StaticFiles(directory=str(WEB_DIR)), name="static")
 _brain: Brain | None = None
@@ -2020,7 +2020,7 @@ def main() -> None:
     host = cfg["server"]["host"]
     port = int(cfg["server"]["port"])
     print("=" * 58)
-    print("  NekoPal 猫娘伴友 已启动")
+    print("  NekoPal AI伴友 已启动")
     print(f"  面板地址： http://{host}:{port}")
     print(f"  配置文件： {ROOT / 'config.json'}")
     if not cfg["llm"]["api_key"]:

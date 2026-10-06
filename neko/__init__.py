@@ -1,4 +1,4 @@
-"""NekoPal —— 虚拟猫娘伴友。
+"""NekoPal —— 虚拟AI伴友。
 
 模块划分：
     config    配置加载

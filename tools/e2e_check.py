@@ -81,7 +81,7 @@ def main() -> int:
     os.environ["NEKO_LLM_BASE_URL"] = base
 
     print("=" * 72)
-    print("  蕴 · 猫娘伴友 —— 端到端验证（本地模拟 LLM，不需要真实 Key）")
+    print("  蕴 · AI伴友 —— 端到端验证（本地模拟 LLM，不需要真实 Key）")
     print(f"  模拟 LLM: {base}    临时数据: {tmpdir}")
     print("=" * 72)
 

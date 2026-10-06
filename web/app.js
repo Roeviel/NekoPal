@@ -1,5 +1,5 @@
 /* ==========================================================================
-   蕴 · 猫娘伴友 —— 前端逻辑（仿微信布局）
+   蕴 · AI伴友 —— 前端逻辑（仿微信布局）
    左：导航栏（头像可点换） 中：列表栏 右：主内容（聊天 / 笔记 / 记忆 / 设置）
    ========================================================================== */
 
@@ -256,7 +256,7 @@ function applyAppearance() {
   $("#bg-opacity").value = String(Math.round(opacity * 100));
   $("#bg-opacity-val").textContent = `${Math.round(opacity * 100)}%`;
 
-  document.title = `${nekoName()} · 猫娘伴友`;
+  document.title = `${nekoName()} · AI伴友`;
   $("#chat-title").textContent = nekoName();
   $("#chat-sub").textContent = `${AP.persona.style || ""} · 称呼你「${userName()}」`;
   $("#pf-name").value = AP.persona.name || "";
@@ -2555,7 +2555,7 @@ $("#btn-conn-copy")?.addEventListener("click", async () => {
   const hint = $("#conn-hint");
   if (!CONN) { hint.textContent = "信息还没读到"; return; }
   const lines = [
-    "蕴 · 猫娘伴友 —— 机器人接入信息",
+    "蕴 · AI伴友 —— 机器人接入信息",
     "本机地址: " + CONN.base_local,
     "局域网地址: " + CONN.base_lan,
     "访问 Token: " + (CONN.token || "（未设置）"),

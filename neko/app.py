@@ -33,7 +33,7 @@ import httpx
 
 from .config import ROOT, ensure_config_file, load_config
 
-WINDOW_TITLE = "蕴 · 猫娘伴友"
+WINDOW_TITLE = "蕴 · AI伴友"
 WINDOW_SIZE = (1200, 840)
 MIN_SIZE = (900, 620)
 
@@ -233,7 +233,7 @@ def run_native_window(url: str) -> bool:
 # ------------------------------------------------------------------ 主流程
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="蕴 · 猫娘伴友（桌面应用）")
+    parser = argparse.ArgumentParser(description="蕴 · AI伴友（桌面应用）")
     parser.add_argument("--browser", action="store_true", help="强制用浏览器应用窗口，不用 pywebview")
     parser.add_argument("--web", action="store_true", help="只启服务，不自动开窗口")
     parser.add_argument("--port", type=int, default=None, help="覆盖配置里的端口")
@@ -273,7 +273,7 @@ def main() -> int:
         url = f"{url}/#{start_view}"
     persona = cfg.get("persona", {})
     print("=" * 58)
-    print(f"  {persona.get('name', '蕴')} · 猫娘伴友 已启动")
+    print(f"  {persona.get('name', '蕴')} · AI伴友 已启动")
     print(f"  地址： {url}")
     if not cfg["llm"]["api_key"]:
         print("  [注意] 还没配置 DeepSeek API Key，现在只能离线陪你说话")

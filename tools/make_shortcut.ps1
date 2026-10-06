@@ -1,5 +1,5 @@
 ﻿<#
-  在桌面创建「蕴 · 猫娘伴友」快捷方式。
+  在桌面创建「蕴 · AI伴友」快捷方式。
 
   单独一个脚本而不是塞进 .bat 里：批处理里的中文和内联 PowerShell 引号
   太容易在代码页变化时被解析坏（这个项目已经踩过两次），
@@ -10,7 +10,7 @@
 #>
 [CmdletBinding()]
 param(
-    [string]$Name = '蕴 · 猫娘伴友'
+    [string]$Name = '蕴 · AI伴友'
 )
 
 $ErrorActionPreference = 'Stop'
