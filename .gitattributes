@@ -1,0 +1,9 @@
+# 这几个脚本的**编码和换行是行为的一部分**（见 README「关于脚本编码」）：
+#   .vbs 是 UTF-16LE+BOM、.bat 是 GBK，让 git 做换行转换会让它们在某些机器上直接解析失败
+*.bat -text
+*.vbs -text
+*.ps1 -text
+
+# 二进制资源，不要当文本处理
+*.png binary
+*.ico binary

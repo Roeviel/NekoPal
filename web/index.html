@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="wechat">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>蕴 · 猫娘伴友</title>
+<link rel="icon" href="/favicon.ico">
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<div class="app" id="app">
+
+  <!-- ================= 最左：导航栏（仿微信深色窄栏） ================= -->
+  <nav class="rail">
+    <div class="rail-avatar" id="rail-avatar" title="点击更换她的头像">
+      <img id="neko-avatar-img" alt="她的头像">
+      <span class="avatar-fallback" id="neko-avatar-fallback">蕴</span>
+      <span class="avatar-edit">换</span>
+    </div>
+
+    <button class="rail-btn active" data-view="chat" title="聊天">
+      <span class="ico">💬</span><span class="lbl">聊天</span>
+      <span class="dot" id="chat-dot"></span>
+    </button>
+    <button class="rail-btn" data-view="notes" title="学习笔记">
+      <span class="ico">📒</span><span class="lbl">笔记</span>
+      <span class="badge" id="notes-count">0</span>
+    </button>
+    <button class="rail-btn" data-view="memory" title="长期记忆">
+      <span class="ico">🧠</span><span class="lbl">记忆</span>
+      <span class="badge" id="memory-count">0</span>
+    </button>
+    <button class="rail-btn" data-view="music" title="一起听音乐">
+      <span class="ico">🎵</span><span class="lbl">音乐</span>
+      <span class="badge" id="music-count">0</span>
+    </button>
+    <button class="rail-btn" data-view="settings" title="设置">
+      <span class="ico">⚙️</span><span class="lbl">设置</span>
+    </button>
+
+    <div class="rail-spacer"></div>
+    <button class="rail-btn small" id="rail-status-btn" title="运行状态">
+      <span class="ico" id="rail-status-ico">●</span><span class="lbl" id="rail-status-lbl">离线</span>
+    </button>
+  </nav>
+
+  <!-- ================= 中间：列表栏 ================= -->
+  <section class="list-pane" id="list-pane">
+    <header class="list-head">
+      <div class="search-box">
+        <span class="search-ico">🔍</span>
+        <input id="search-input" placeholder="搜索" autocomplete="off">
+      </div>
+    </header>
+    <div class="list-body" id="list-body"></div>
+    <footer class="list-foot">
+      <span id="list-foot-text"></span>
+    </footer>
+  </section>
+
+  <!-- ================= 右侧：主内容 ================= -->
+  <main class="main-pane">
+
+    <!-- ---------- 聊天 ---------- -->
+    <section class="view active" id="view-chat">
+      <header class="chat-head">
+        <div class="chat-head-left">
+          <span class="chat-title" id="chat-title">蕴</span>
+          <span class="chat-sub" id="chat-sub">猫娘伴友</span>
+        </div>
+        <div class="chat-head-right">
+          <label class="switch" title="开启后她会定时自己去 B 站学习，学完主动讲给你听">
+            <input type="checkbox" id="auto-study"><span>自学</span>
+          </label>
+          <label class="switch" title="回复时自动朗读（这个开关会被记住，下次打开还是你设的样子）">
+            <input type="checkbox" id="auto-voice"><span>朗读</span>
+          </label>
+          <!-- 余额：一行小字，不抢眼。鼠标悬停/点击看今天的用量和被拦次数 -->
+          <button class="meter" id="meter" title="余额">¥—</button>
+          <button class="icon-btn" id="btn-clear" title="清空对话">🧹</button>
+        </div>
+      </header>
+
+      <!-- 背景必须挂在**不滚动**的这一层上。
+           以前背景直接挂在 .messages（滚动容器）上，聊天一长、往下滚，
+           背景就跟着内容滚走了，下面露出底色 —— 就是"对话时出现空白"。 -->
+      <div class="chat-scroll">
+        <div class="messages" id="messages"></div>
+      </div>
+
+      <div class="composer">
+        <div class="composer-tools">
+          <button class="tool" id="btn-emoji">😀 表情</button>
+          <button class="tool" data-cmd="学点东西" title="想让指定内容：直接说「学点 Python 装饰器」，或贴一个 B 站链接；也可以在 设置 → 学习方向 里配置">📺 学点东西</button>
+          <button class="tool" data-cmd="考考我">📝 考考我</button>
+          <button class="tool" data-cmd="你学过什么">📚 学过什么</button>
+          <button class="tool" id="btn-together" title="一起听一首：留空就让她从你的「最近在听」里挑；也可以先在输入框写歌名再点">🎧 一起听歌</button>
+          <button class="tool" id="btn-proactive">💌 让她分享</button>
+        </div>
+
+        <div class="emoji-panel hidden" id="emoji-panel">
+          <div class="emoji-tabs">
+            <button class="etab active" data-etab="sticker">表情包</button>
+            <button class="etab" data-etab="kaomoji">颜文字</button>
+            <button class="etab" data-etab="emoji">Emoji</button>
+            <button class="etab" data-etab="search">🔍 联网搜</button>
+          </div>
+          <div class="emoji-body" id="emoji-body"></div>
+        </div>
+
+        <textarea id="input" rows="2" placeholder="发消息…（Enter 发送，Shift + Enter 换行）"></textarea>
+        <div class="composer-foot">
+          <span class="hint" id="hint"></span>
+          <button class="send-btn" id="btn-send">发送</button>
+        </div>
+      </div>
+
+      <!-- 多选删除的操作条：只在选择模式下出现 -->
+      <div class="pick-bar" id="pick-bar">
+        <span class="pick-count" id="pick-count">已选 0 条</span>
+        <button class="ghost-btn" id="btn-pick-all">全选</button>
+        <button class="ghost-btn danger" id="btn-pick-del">删除</button>
+        <button class="ghost-btn" id="btn-pick-cancel">取消</button>
+        <span class="hint" id="pick-hint"></span>
+      </div>
+    </section>
+
+    <!-- 正在播放：悬浮小播放器。点卡片播放时出现，可拖、可关。
+         注意 id 不能叫 "player" —— 下面那个语音用的 <audio id="player"> 已经占了，
+         重名会让 $("#player") 返回错的那个，语音就播不出来了。 -->
+    <div class="player" id="music-player" hidden>
+      <img class="pl-cover" id="pl-cover" alt="" />
+      <div class="pl-main">
+        <div class="pl-title" id="pl-title">—</div>
+        <div class="pl-artist" id="pl-artist"></div>
+        <div class="pl-bar" id="pl-bar">
+          <div class="pl-fill" id="pl-fill"></div>
+        </div>
+        <div class="pl-time">
+          <span id="pl-cur">0:00</span>
+          <span id="pl-dur">0:00</span>
+        </div>
+      </div>
+      <div class="pl-btns">
+        <button class="pl-btn" id="pl-toggle" title="播放 / 暂停">⏸</button>
+        <button class="pl-btn pl-close" id="pl-close" title="关掉播放器">✕</button>
+      </div>
+    </div>
+
+    <!-- ---------- 笔记详情 ---------- -->
+    <section class="view" id="view-notes">
+      <header class="chat-head">
+        <div class="chat-head-left">
+          <span class="chat-title">学习笔记</span>
+          <span class="chat-sub" id="notes-sub"></span>
+        </div>
+        <div class="chat-head-right">
+          <button class="ghost-btn" id="btn-refresh-notes">刷新</button>
+        </div>
+      </header>
+      <div class="paper" id="note-detail">
+        <div class="empty-lg">左边选一条笔记看看</div>
+      </div>
+    </section>
+
+    <!-- ---------- 记忆 ---------- -->
+    <section class="view" id="view-memory">
+      <header class="chat-head">
+        <div class="chat-head-left">
+          <span class="chat-title">长期记忆</span>
+          <span class="chat-sub">她记住的关于你的事</span>
+        </div>
+        <div class="chat-head-right">
+          <button class="ghost-btn" id="btn-clear-mem">清空</button>
+        </div>
+      </header>
+      <div class="paper">
+        <div class="mem-form">
+          <input id="mem-value" placeholder="让她记住一件事，比如：我喜欢喝冰美式">
+          <button class="send-btn" id="btn-add-mem">记住</button>
+        </div>
+        <div id="mem-list" class="mem-list"></div>
+      </div>
+    </section>
+
+    <!-- ---------- 一起听音乐 ---------- -->
+    <section class="view" id="view-music">
+      <header class="chat-head">
+        <div class="chat-head-left">
+          <span class="chat-title">一起听音乐</span>
+          <span class="chat-sub" id="music-sub">登录网易云后，她能看见你在听什么</span>
+        </div>
+        <div class="chat-head-right">
+          <button class="ghost-btn" id="btn-music-login">扫码登录</button>
+          <button class="ghost-btn" id="btn-music-refresh">刷新</button>
+        </div>
+      </header>
+
+      <div class="paper">
+        <!-- 选哪家 -->
+        <h3 class="sec">用哪家</h3>
+        <div class="rows">
+          <div class="row">
+            <div class="row-label">
+              <b>音乐服务</b>
+              <small>两家的<b>搜歌都免登录</b>，所以「一起听」不登录也能用；
+                登录只影响「最近在听」。两家可以同时登着。</small>
+            </div>
+            <div class="row-ctl">
+              <label class="pick"><input type="radio" name="music-provider" value="netease" id="mp-netease" /> 网易云音乐</label>
+              <label class="pick"><input type="radio" name="music-provider" value="qq" id="mp-qq" /> QQ音乐</label>
+            </div>
+          </div>
+        </div>
+
+        <!-- 登录区：未登录时显示二维码 -->
+        <div class="row" id="music-login-row">
+          <div class="row-label">
+            <b id="music-who">还没登录</b>
+            <small id="music-login-hint">
+              点右上角「扫码登录」，用手机 App 扫一下就行 ——
+              不用把账号密码给这个程序，随时可以在手机上退出登录。
+            </small>
+            <div class="qr-box" id="music-qr" style="display:none"></div>
+          </div>
+          <div class="row-ctl">
+            <button class="ghost-btn danger" id="btn-music-logout" style="display:none">退出登录</button>
+          </div>
+        </div>
+
+        <!-- 扫码走不通时的兜底：直接导入 cookie。默认收起，不占地方 -->
+        <div class="rows">
+          <div class="row">
+            <div class="row-label">
+              <b>扫不动？改用 Cookie 登录</b>
+              <small>
+                扫码有时会失败：网易云会判"版本不匹配"；QQ的码<b>只有手机QQ App</b>
+                认得出，用别的 App 扫会跳到 QQ 下载页。<b>Cookie 这条路不看二维码。</b>
+              </small>
+            </div>
+            <div class="row-ctl">
+              <button class="ghost-btn" id="btn-music-cookie-toggle">展开</button>
+            </div>
+          </div>
+          <div id="music-cookie-box" style="display:none">
+            <div class="risk-note" id="music-cookie-steps"></div>
+            <textarea class="text-input" id="music-cookie-text" rows="3"
+              placeholder="整段粘贴就行，多余的会自己忽略"></textarea>
+            <div class="row-ctl" style="margin-top:8px">
+              <button class="send-btn" id="btn-music-cookie-save">导入</button>
+              <span class="hint" id="music-cookie-hint"></span>
+            </div>
+          </div>
+        </div>
+
+        <h3 class="sec">一起听一首</h3>
+        <div class="rows">
+          <div class="row">
+            <div class="row-label">
+              <b>想听什么</b>
+              <small>留空就让她从你的「最近在听」里挑一首</small>
+            </div>
+            <div class="row-ctl">
+              <input class="text-input" id="music-keyword" placeholder="歌名 / 歌手，留空也行" />
+              <button class="send-btn" id="btn-music-together">一起听</button>
+            </div>
+          </div>
+          <div id="music-now"></div>
+        </div>
+
+        <h3 class="sec" id="sec-taste">听歌倾向<small class="sec-hint" id="taste-hint"></small></h3>
+        <div class="rows">
+          <div class="row">
+            <div class="row-label">
+              <b>她挑歌时会参考这个</b>
+              <small>
+                填<b>歌手</b>或风格关键词，用「、」或逗号分开。<br />
+                这决定她推荐/搜索时优先挑谁、避开谁 —— 不填的话她只能靠"最近在听"
+                和你对每首歌的表态来猜。
+              </small>
+            </div>
+            <div class="row-ctl">
+              <button class="ghost-btn" id="btn-taste-preview">她会挑哪首</button>
+              <button class="send-btn" id="btn-taste-save">保存</button>
+            </div>
+          </div>
+          <div class="row">
+            <div class="row-label"><b>喜欢的</b></div>
+            <div class="row-ctl">
+              <input class="text-input" id="taste-likes" placeholder="周杰伦、久石让、钢琴曲" />
+            </div>
+          </div>
+          <div class="row">
+            <div class="row-label"><b>不想听的</b></div>
+            <div class="row-ctl">
+              <input class="text-input" id="taste-dislikes" placeholder="DJ版、翻唱、某歌手" />
+            </div>
+          </div>
+          <div class="row">
+            <div class="row-label">
+              <b>优先从「最近在听」里挑</b>
+              <small>那才是你真实的口味，比随机搜准得多</small>
+            </div>
+            <div class="row-ctl">
+              <input type="checkbox" id="taste-history" />
+            </div>
+          </div>
+          <div id="taste-preview-box"></div>
+        </div>
+
+        <h3 class="sec">最近在听<small class="sec-hint" id="music-recent-hint"></small></h3>
+        <div class="rows" id="music-recent">
+          <div class="empty">登录后这里会显示你最近在听什么</div>
+        </div>
+
+        <h3 class="sec">一起听过<small class="sec-hint" id="music-stats"></small></h3>
+        <div class="rows" id="music-sessions">
+          <div class="empty">还没有一起听过</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---------- 设置 ---------- -->
+    <section class="view" id="view-settings">
+      <header class="chat-head">
+        <div class="chat-head-left">
+          <span class="chat-title">设置</span>
+          <span class="chat-sub">头像、背景、人设</span>
+        </div>
+      </header>
+      <div class="paper settings">
+
+        <h3 class="sec">头像</h3>
+        <div class="rows">
+          <div class="row">
+            <div class="row-label">
+              <b>她的头像</b>
+              <small>显示在聊天里和左侧导航栏</small>
+            </div>
+            <div class="row-ctl">
+              <img class="thumb" id="thumb-neko" alt="">
+              <label class="file-btn">选择图片<input type="file" accept="image/*" data-kind="neko_avatar" hidden></label>
+              <button class="ghost-btn" data-reset="neko_avatar">恢复默认</button>
+            </div>
+          </div>
+          <div class="row">
+            <div class="row-label">
+              <b>我的头像</b>
+              <small>显示在你发的消息旁边</small>
+            </div>
+            <div class="row-ctl">
+              <img class="thumb round" id="thumb-user" alt="">
+              <label class="file-btn">选择图片<input type="file" accept="image/*" data-kind="user_avatar" hidden></label>
+              <button class="ghost-btn" data-reset="user_avatar">恢复默认</button>
+            </div>
+          </div>
+        </div>
+
+        <h3 class="sec">聊天背景</h3>
+        <div class="rows">
+          <div class="row">
+            <div class="row-label">
+              <b>背景图片</b>
+              <small>建议浅色图，太花的图可以调低下面的浓度</small>
+            </div>
+            <div class="row-ctl">
+              <div class="thumb wide" id="thumb-bg"></div>
+              <label class="file-btn">选择图片<input type="file" accept="image/*" data-kind="chat_background" hidden></label>
+              <button class="ghost-btn" data-reset="chat_background">恢复默认</button>
+            </div>
+          </div>
+          <div class="row">
+            <div class="row-label">
+              <b>背景浓度</b>
+              <small>越低背景越淡，字越好读</small>
+            </div>
+            <div class="row-ctl">
+              <input type="range" id="bg-opacity" min="10" max="100" step="5" value="100">
+              <span class="val" id="bg-opacity-val">100%</span>
+            </div>
+          </div>
+        </div>
+
+        <h3 class="sec">她是谁</h3>
+        <div class="rows">
+          <div class="row">
+            <div class="row-label"><b>名字</b></div>
+            <div class="row-ctl"><input id="pf-name" placeholder="蕴"></div>
+          </div>
+          <div class="row">
+            <div class="row-label"><b>怎么称呼你</b></div>
+            <div class="row-ctl"><input id="pf-call" placeholder="同行者"></div>
+          </div>
+          <div class="row">
+            <div class="row-label"><b>性格</b><small>决定她的语气和说话方式</small></div>
+            <div class="row-ctl"><select id="pf-style"></select></div>
+          </div>
+          <div class="row">
+            <div class="row-label"><b>性格关键词</b><small>用顿号或逗号分隔，会写进她的人设</small></div>
+            <div class="row-ctl"><input id="pf-keywords" placeholder="清冷、理性、敏锐、克制"></div>
+          </div>
+          <div class="row col">
+            <div class="row-label">
+              <b>自由设定</b>
+              <small>想让她是什么样就怎么写。这段<b>优先级最高</b>，会覆盖上面的预设</small>
+            </div>
+            <div class="row-ctl wide">
+              <textarea id="pf-custom" rows="6" placeholder="例如：&#10;你说话要更短一点，别超过两句。&#10;你对编程话题特别有兴趣，别的都懒得聊。&#10;称呼我「老板」。&#10;可以偶尔用颜文字，但别卖萌。"></textarea>
+            </div>
+          </div>
+          <div class="row">
+            <div class="row-label"><b>带「喵」口癖</b><small>清冷人设建议关掉</small></div>
+            <div class="row-ctl">
+              <label class="switch"><input type="checkbox" id="pf-meow"><span>开启</span></label>
+            </div>
+          </div>
+          <div class="row">
+            <div class="row-label"></div>
+            <div class="row-ctl">
+              <button class="send-btn" id="btn-save-persona">保存</button>
+              <span class="hint" id="persona-hint"></span>
+            </div>
+          </div>
+        </div>
+
+        <h3 class="sec" id="sec-bili">哔哩哔哩账号</h3>
+        <div class="rows">
+          <div class="row">
+            <div class="row-label">
+              <b>登录状态</b>
+              <small id="bili-state">检测中…</small>
+            </div>
+            <div class="row-ctl">
+              <button class="ghost-btn" id="btn-bili-login">扫码登录</button>
+              <button class="ghost-btn danger hidden" id="btn-bili-logout">退出登录</button>
+              <span class="hint" id="bili-hint"></span>
+            </div>
+          </div>
+          <div class="row col hidden" id="bili-qr-row">
+            <div class="row-label">
+              <b>用手机 B 站 App 扫码</b>
+              <small>登录后她才能拿到视频字幕——未登录时字幕接口恒为空，笔记等级只能停在「观众视角」</small>
+            </div>
+            <div class="row-ctl"><div class="qr-box" id="bili-qr"></div></div>
+          </div>
+          <div class="row col">
+            <div class="row-label"><b>登录前请知悉</b></div>
+            <div class="row-ctl wide">
+              <div class="risk-note">
+                扫码只用于获取登录凭据（SESSDATA），<b>你的密码不经过这个程序</b>。
+                该凭据会明文保存在本机 <code>config.json</code>，权限等同于你的账号，
+                <b>不要把 config.json 发给别人</b>。<br>
+                程序对 B 站只做只读操作（搜索、取视频信息、取字幕），
+                <b>不会点赞、评论、关注、投币</b>，请求频率也已压到最低以减少风控风险；
+                但自动化访问仍有被判定异常的可能，是否登录由你决定。
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <h3 class="sec">外观主题</h3>
+        <div class="rows">
+          <div class="row">
+            <div class="row-label"><b>主题</b><small>仿微信浅色 / 深色</small></div>
+            <div class="row-ctl">
+              <label class="switch"><input type="radio" name="theme" value="wechat" checked><span>仿微信</span></label>
+              <label class="switch"><input type="radio" name="theme" value="dark"><span>深色</span></label>
+            </div>
+          </div>
+        </div>
+
+        <h3 class="sec" id="sec-study">自主学习</h3>
+        <div class="rows">
+          <div class="row">
+            <div class="row-label">
+              <b>自动自学</b>
+              <small id="sch-state">检测中…</small>
+            </div>
+            <div class="row-ctl">
+              <label class="switch"><input type="checkbox" id="sch-auto"><span>开启</span></label>
+              <button class="send-btn" id="btn-sch-save">保存</button>
+              <span class="hint" id="sch-hint"></span>
+            </div>
+          </div>
+          <div class="row">
+            <div class="row-label"><b>每天固定时刻</b><small>24 小时制，用逗号分隔，例如 12:30, 21:00</small></div>
+            <div class="row-ctl"><input id="sch-times" placeholder="12:30, 21:00"></div>
+          </div>
+          <div class="row">
+            <div class="row-label">
+              <b>每隔几小时学一次</b>
+              <small>软件运行期间生效，0 = 关闭。只有固定时刻的话，那个点没开着软件就等于没学</small>
+            </div>
+            <div class="row-ctl"><input id="sch-every" type="number" min="0" max="48" step="0.5" style="width:90px"><span class="hint">小时</span></div>
+          </div>
+          <div class="row">
+            <div class="row-label"><b>启动后补一次</b><small>如果今天还没学过，启动一会儿之后自动补上</small></div>
+            <div class="row-ctl"><label class="switch"><input type="checkbox" id="sch-catchup"><span>开启</span></label></div>
+          </div>
+        </div>
+
+        <h3 class="sec" id="sec-topics">学习方向</h3>
+        <div class="rows">
+          <div class="row col">
+            <div class="row-label">
+              <b>她会轮着学这些</b>
+              <small>点 × 删掉，在下面输入框加新的。这是"自动自学"时轮换用的主题</small>
+            </div>
+            <div class="row-ctl wide">
+              <div class="topic-chips" id="topic-chips"></div>
+              <div class="inline-add">
+                <input id="topic-new" placeholder="加一个方向，例如：宋词鉴赏">
+                <button class="ghost-btn" id="btn-topic-add">添加</button>
+                <button class="send-btn" id="btn-topics-save">保存</button>
+                <span class="hint" id="topics-hint"></span>
+              </div>
+            </div>
+          </div>
+
+          <div class="row col">
+            <div class="row-label">
+              <b>指定内容，立刻去学</b>
+              <small>
+                只学这一次，不影响上面的轮换列表。<br>
+                也可以直接在聊天里说「<b>学点 &lt;主题&gt;</b>」，
+                或者贴一个 <b>B 站链接 / BV 号</b> 让她学那个具体视频。
+              </small>
+            </div>
+            <div class="row-ctl wide">
+              <div class="inline-add">
+                <input id="study-now" placeholder="例如：Python 装饰器 / 康德的道德哲学 / BV1xx411c7mD">
+                <button class="send-btn" id="btn-study-now">让她去学</button>
+                <span class="hint" id="study-now-hint"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <h3 class="sec" id="sec-voice">声音<small class="sec-hint" id="voice-master-hint"></small></h3>
+        <div class="rows">
+          <div class="row">
+            <div class="row-label">
+              <b>声音总开关</b>
+              <small>关掉之后她只出文字：不合成语音、不朗读，对话页的「朗读」键也会一起收起来</small>
+            </div>
+            <div class="row-ctl">
+              <label class="switch"><input type="checkbox" id="voice-on"><span>开启</span></label>
+            </div>
+          </div>
+        </div>
+
+        <div class="sub-sec">音色试听</div>
+        <div class="rows">
+          <div class="row">
+            <div class="row-label">
+              <b>她的声音</b>
+              <small id="voice-state">点「试听」听一遍，满意再点「用这个」</small>
+            </div>
+            <div class="row-ctl">
+              <span class="hint" id="voice-hint"></span>
+            </div>
+          </div>
+        </div>
+        <div class="voice-list" id="voice-list"></div>
+
+        <div class="sub-sec" id="sec-rvc">RVC 变声（真人音色）</div>
+        <div class="rows">
+          <div class="row">
+            <div class="row-label">
+              <b>用训练好的模型换音色</b>
+              <small id="rvc-state">检测中…</small>
+            </div>
+            <div class="row-ctl">
+              <label class="switch" title="开启后每句话都会跑一次 RVC 推理：更像真人，但每句话要多等几秒">
+                <input type="checkbox" id="rvc-on"><span>开启</span>
+              </label>
+              <span class="hint" id="rvc-hint"></span>
+            </div>
+          </div>
+        </div>
+        <div class="voice-list" id="rvc-list"></div>
+
+        <h3 class="sec" id="sec-llm">大脑（大模型）</h3>
+        <div class="rows">
+          <div class="row">
+            <div class="row-label">
+              <b>DeepSeek API Key</b>
+              <small id="llm-state">检测中…</small>
+            </div>
+            <div class="row-ctl">
+              <input type="password" id="llm-key" placeholder="sk-…（粘贴到这里）" autocomplete="off" spellcheck="false">
+              <button class="send-btn" id="btn-save-llm">保存</button>
+            </div>
+          </div>
+          <div class="row">
+            <div class="row-label"><b>服务商</b><small>选一个会自动填好接口地址；任意 OpenAI 兼容服务都能用</small></div>
+            <div class="row-ctl">
+              <select id="llm-provider"></select>
+              <span class="hint" id="llm-provider-hint"></span>
+            </div>
+          </div>
+          <div class="row">
+            <div class="row-label"><b>接口地址</b><small>DeepSeek 官方，或任意 OpenAI 兼容服务</small></div>
+            <div class="row-ctl"><input id="llm-base" placeholder="https://api.deepseek.com"></div>
+          </div>
+          <div class="row">
+            <div class="row-label">
+              <b>模型</b>
+              <small id="llm-model-note">点右边「获取可用模型」会向接口问它有哪些模型</small>
+            </div>
+            <div class="row-ctl">
+              <select id="llm-model-pick"><option value="">（还没获取列表）</option></select>
+              <button class="ghost-btn" id="btn-llm-models">获取可用模型</button>
+              <span class="hint" id="llm-models-hint"></span>
+            </div>
+          </div>
+          <div class="row">
+            <div class="row-label"><b>模型名</b><small>可以直接手打，也可以用上面的列表选</small></div>
+            <div class="row-ctl"><input id="llm-model" placeholder="deepseek-chat"></div>
+          </div>
+          <div class="row">
+            <div class="row-label"></div>
+            <div class="row-ctl">
+              <button class="ghost-btn" id="btn-llm-test">测一下能不能用</button>
+              <span class="hint" id="llm-test-hint"></span>
+            </div>
+          </div>
+          <div class="row">
+            <div class="row-label"></div>
+            <div class="row-ctl"><span class="hint" id="llm-hint"></span></div>
+          </div>
+        </div>
+
+        <h3 class="sec">数据清理</h3>
+        <div class="rows">
+          <div class="row">
+            <div class="row-label">
+              <b>清除聊天记录</b>
+              <small>只删对话，笔记和记忆留着</small>
+            </div>
+            <div class="row-ctl">
+              <button class="ghost-btn danger" data-clear="chat">清除</button>
+            </div>
+          </div>
+          <div class="row">
+            <div class="row-label">
+              <b>清空长期记忆</b>
+              <small>她会忘掉记住的关于你的事</small>
+            </div>
+            <div class="row-ctl">
+              <button class="ghost-btn danger" data-clear="memory">清空</button>
+            </div>
+          </div>
+          <div class="row">
+            <div class="row-label">
+              <b>删除全部学习笔记</b>
+              <small>看过的视频和知识点全删，不可恢复</small>
+            </div>
+            <div class="row-ctl">
+              <button class="ghost-btn danger" data-clear="notes">删除</button>
+            </div>
+          </div>
+          <div class="row">
+            <div class="row-label">
+              <b>全部清除</b>
+              <small>对话 + 记忆 + 笔记，回到全新状态（清除前会自动存档，能读回来）</small>
+            </div>
+            <div class="row-ctl">
+              <button class="ghost-btn danger" data-clear="all">全部清除</button>
+              <span class="hint" id="clear-hint"></span>
+            </div>
+          </div>
+        </div>
+
+        <h3 class="sec" id="sec-saves">存档</h3>
+        <div class="card">
+          <div class="row">
+            <div class="row-label">
+              <b>保存当前进度</b>
+              <small>像游戏存档一样：对话、记忆、笔记整体存一份，随时能读回来。
+                关掉软件和清除数据之前都会自动存一次。</small>
+            </div>
+            <div class="row-ctl">
+              <input class="text-input save-name-input" id="save-name"
+                     placeholder="存档名（留空自动命名）" />
+              <button class="ghost-btn" id="btn-save-create">存档</button>
+            </div>
+          </div>
+          <div class="row">
+            <div class="row-label">
+              <b>存档列表</b>
+              <small id="saves-dir">读取会覆盖当前的对话 / 记忆 / 笔记（读取前也会先自动备份）</small>
+            </div>
+          </div>
+          <div id="saves-list" class="saves-list">
+            <div class="saves-empty">还没有存档</div>
+          </div>
+          <span class="hint" id="saves-hint"></span>
+        </div>
+
+        <h3 class="sec" id="sec-devices">设备连接</h3>
+        <div class="card">
+          <div class="row">
+            <div class="row-label">
+              <b>允许她操作设备</b>
+              <small>打开后她才能在回复里写 <code>[设备:台灯=开]</code> 去真的动手</small>
+            </div>
+            <div class="row-ctl">
+              <input type="checkbox" id="dev-enabled" />
+            </div>
+          </div>
+          <div class="row">
+            <div class="row-label">
+              <b>允许局域网接入</b>
+              <small id="dev-lan-note">默认只监听本机，硬件（桌面机器人）连不上。
+                打开后会自动生成访问 Token，重启软件生效</small>
+            </div>
+            <div class="row-ctl">
+              <input type="checkbox" id="dev-lan" />
+            </div>
+          </div>
+          <div class="row">
+            <div class="row-label">
+              <b>设备网关地址</b>
+              <small>蕴不直接碰设备，把动作交给网关（网关再做 MQTT / HomeAssistant 适配）</small>
+            </div>
+            <div class="row-ctl">
+              <input class="text-input" id="dev-gateway" placeholder="http://127.0.0.1:8791" />
+              <button class="ghost-btn" id="btn-dev-test">测试连接</button>
+            </div>
+          </div>
+          <div class="row">
+            <div class="row-label"><b>网关 Token</b><small>网关那边校验，没有就留空</small></div>
+            <div class="row-ctl">
+              <input class="text-input" id="dev-token" placeholder="（可留空）" />
+              <button class="ghost-btn" id="btn-dev-save">保存</button>
+            </div>
+          </div>
+          <div class="row">
+            <div class="row-label"><b>连接状态</b><small id="dev-status">未测试</small></div>
+          </div>
+
+          <div class="row">
+            <div class="row-label">
+              <b>可控设备（白名单）</b>
+              <small>只有登记过的设备她才能操作。LLM 会凭空编设备，这里是唯一的闸</small>
+            </div>
+          </div>
+          <div id="dev-list" class="saves-list"></div>
+          <div class="row">
+            <div class="row-label"><b>添加设备</b><small>动作用中文逗号或空格分隔，例如「开、关」</small></div>
+            <div class="row-ctl">
+              <input class="text-input" id="dev-new-name" placeholder="名称，如 风扇" />
+              <input class="text-input" id="dev-new-actions" placeholder="动作，如 开、关" />
+              <label class="dev-danger"><input type="checkbox" id="dev-new-danger" />危险</label>
+              <button class="ghost-btn" id="btn-dev-add">添加</button>
+            </div>
+          </div>
+        </div>
+
+        <h3 class="sec" id="sec-connect">机器人接入信息</h3>
+        <div class="card">
+          <div class="row">
+            <div class="row-label">
+              <b>把它填进硬件固件里</b>
+              <small id="conn-note">正在读取…</small>
+            </div>
+            <div class="row-ctl">
+              <button class="ghost-btn" id="btn-conn-copy">复制接入信息</button>
+            </div>
+          </div>
+          <div class="row">
+            <div class="row-label"><b>局域网地址</b><small id="conn-lan">—</small></div>
+          </div>
+          <div class="row">
+            <div class="row-label">
+              <b>访问 Token</b>
+              <small>局域网请求必须带 <code>Authorization: Bearer &lt;token&gt;</code>。
+                本机界面不受影响</small>
+            </div>
+            <div class="row-ctl">
+              <code class="conn-token" id="conn-token">（未生成）</code>
+              <button class="ghost-btn" id="btn-conn-token">重新生成</button>
+            </div>
+          </div>
+          <div class="row">
+            <div class="row-label"><b>可用接口</b><small id="conn-endpoints">—</small></div>
+          </div>
+          <span class="hint" id="conn-hint"></span>
+        </div>
+
+        <h3 class="sec" id="sec-budget">用量与预算</h3>
+        <div class="rows">
+          <div class="row">
+            <div class="row-label">
+              <b>接入 AI 大模型</b>
+              <small>总开关。关掉后一次 API 请求都不会发出去，她会走离线兜底回复
+                （还能陪聊、看笔记、操作设备，但答不了新问题）</small>
+            </div>
+            <div class="row-ctl">
+              <input type="checkbox" id="budget-llm" />
+            </div>
+          </div>
+          <div class="row">
+            <div class="row-label">
+              <b>显示消耗金额</b>
+              <small>聊天界面右上角那行小字。关掉就完全不显示，不打扰你</small>
+            </div>
+            <div class="row-ctl">
+              <input type="checkbox" id="budget-show" />
+            </div>
+          </div>
+          <div class="row">
+            <div class="row-label">
+              <b>每日消耗上限</b>
+              <small>超过就不再调用模型，她会直接告诉你额度用完了</small>
+            </div>
+            <div class="row-ctl">
+              <input class="text-input" id="budget-daily" type="number" step="0.5" min="0" />
+              <span class="hint">元 / 天（0 = 不限制）</span>
+              <button class="ghost-btn" id="btn-budget-save">保存</button>
+            </div>
+          </div>
+          <div class="row">
+            <div class="row-label">
+              <b>今日用量</b>
+              <small id="budget-detail">正在读取…</small>
+            </div>
+            <div class="row-ctl">
+              <button class="ghost-btn" id="btn-budget-refresh">刷新</button>
+            </div>
+          </div>
+          <span class="hint" id="budget-hint"></span>
+        </div>
+
+        <h3 class="sec">运行状态</h3>
+        <div class="rows">
+          <div class="row">
+            <div class="row-label">
+              <b>重新读取配置</b>
+              <small>改完 config.json（比如刚填上 API Key）后点这里，不用重启应用</small>
+            </div>
+            <div class="row-ctl">
+              <button class="send-btn" id="btn-reload">重新读取</button>
+              <span class="hint" id="reload-hint"></span>
+            </div>
+          </div>
+        </div>
+        <pre class="status-box" id="status-box">加载中…</pre>
+
+      </div>
+    </section>
+  </main>
+</div>
+
+<input type="file" id="hidden-file" accept="image/*" hidden>
+<audio id="player"></audio>
+<script>
+/* 前端错误上报：应用窗口没有控制台，界面出问题时必须能把真实堆栈送到后端，
+   否则只能靠猜（"中间那栏怎么是空的"就是这么来的）。 */
+(function () {
+  function report(kind, message, source, stack) {
+    try {
+      fetch("/api/clientlog", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ kind: kind, message: message, source: source, stack: stack })
+      });
+    } catch (_) {}
+  }
+  window.addEventListener("error", function (e) {
+    report("error", String(e.message || e.type),
+           (e.filename || "") + ":" + (e.lineno || 0) + ":" + (e.colno || 0),
+           (e.error && e.error.stack) || "");
+  });
+  window.addEventListener("unhandledrejection", function (e) {
+    var r = e.reason || {};
+    report("rejection", String(r.message || r), "", String(r.stack || ""));
+  });
+})();
+</script>
+<script src="/static/app.js"></script>
+</body>
+</html>

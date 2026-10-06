@@ -1,0 +1,180 @@
+{
+  "llm": {
+    "enabled": true,
+    "provider": "deepseek",
+    "base_url": "https://api.deepseek.com",
+    "model": "deepseek-chat",
+    "api_key": "",
+    "temperature": 1.1,
+    "max_tokens": 1024,
+    "timeout": 90
+  },
+  "persona": {
+    "name": "蕴",
+    "call_user": "同行者",
+    "style": "清冷智者",
+    "keywords": [
+      "清冷",
+      "理性",
+      "敏锐",
+      "克制"
+    ],
+    "meow": false,
+    "custom_prompt": ""
+  },
+  "voice": {
+    "enabled": true,
+    "auto_read": true,
+    "engine": "edge-tts",
+    "azure_voice": "zh-CN-XiaoxiaoNeural",
+    "rate": "+0%",
+    "volume": "+0%",
+    "pitch_semitones": 2.0,
+    "formant_shift": 0.12,
+    "reverb": 0.0,
+    "gain_db": 0.0,
+    "cache_dir": "data/voice_cache",
+    "max_chars": 400,
+    "rvc": {
+      "enabled": false,
+      "dir": "",
+      "voice": "",
+      "f0_method": "rmvpe",
+      "timeout_sec": 120,
+      "voices": []
+    }
+  },
+  "bilibili": {
+    "cookie": "",
+    "topics": [
+      "Python 编程",
+      "高等数学",
+      "线性代数",
+      "概率论",
+      "哲学入门",
+      "逻辑学",
+      "心理学",
+      "亲密关系与爱情",
+      "沟通与表达",
+      "机器学习入门",
+      "经济学思维",
+      "科学史",
+      "写作技巧",
+      "视频剪辑技巧"
+    ],
+    "daily_limit": 3,
+    "subtitle_priority": [
+      "zh-CN",
+      "zh-Hans",
+      "zh-Hant",
+      "ai-zh"
+    ],
+    "search_limit": 20,
+    "subtitle_try": 5,
+    "use_audience": true,
+    "danmaku_limit": 300,
+    "comment_limit": 20
+  },
+  "wechat": {
+    "enabled": true,
+    "listen": [
+      "文件传输助手"
+    ],
+    "reply_target": "文件传输助手",
+    "poll_interval": 2.0,
+    "send_voice": true,
+    "quiet_hours": [],
+    "echo_self": false
+  },
+  "appearance": {
+    "neko_avatar": "",
+    "user_avatar": "",
+    "chat_background": "",
+    "theme": "wechat",
+    "background_opacity": 1.0
+  },
+  "memory": {
+    "db_path": "data/neko.db",
+    "recent_messages": 20,
+    "saves_dir": "data/saves",
+    "auto_save": {
+      "on_quit": true,
+      "on_start": false,
+      "before_clear": false
+    }
+  },
+  "music": {
+    "enabled": true,
+    "invite_tokens": 80,
+    "explain_tokens": 400,
+    "qr_ttl_sec": 240,
+    "taste": {
+      "likes": [],
+      "dislikes": [],
+      "prefer_history": true
+    }
+  },
+  "schedule": {
+    "auto_study": true,
+    "times": [
+      "12:30",
+      "21:00"
+    ],
+    "every_hours": 4,
+    "catch_up": true,
+    "startup_delay": 120
+  },
+  "asr": {
+    "enabled": true,
+    "model": "base",
+    "max_seconds": 300,
+    "language": "zh",
+    "initial_prompt": "以下是普通话的课程讲解内容，可能有专业术语。",
+    "model_dir": "data/asr_models"
+  },
+  "devices": {
+    "enabled": false,
+    "gateway": "http://127.0.0.1:8791",
+    "token": "",
+    "timeout": 6.0,
+    "list": []
+  },
+  "motion": {
+    "enabled": false,
+    "gateway": "",
+    "token": "",
+    "max_speed": 70,
+    "max_duration": 3.0,
+    "max_distance": 3.0,
+    "default_speed": 50,
+    "default_duration": 1.0,
+    "blind_max_speed": 35
+  },
+  "budget": {
+    "enabled": true,
+    "show": true,
+    "daily_cny": 2.0,
+    "price_in_cache_hit": 0.5,
+    "price_in_cache_miss": 2.0,
+    "price_out": 8.0,
+    "duplicate_window_sec": 600,
+    "duplicate_max": 3,
+    "max_per_minute": 12,
+    "balance_ttl_sec": 120
+  },
+  "server": {
+    "host": "127.0.0.1",
+    "port": 8790
+  },
+  "window": {
+    "disable_sandbox": true
+  },
+  "assets_dir": "data/assets",
+  "stickers": {
+    "user_dir": "data/stickers",
+    "search": true,
+    "count": 12,
+    "cache_dir": "data/stickers_cache",
+    "search_prefix": "动漫猫娘 表情包 可爱 q版"
+  }
+}

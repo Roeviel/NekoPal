@@ -1,0 +1,25 @@
+# NekoPal 主环境依赖（核心：大脑 / B站 / 记忆 / 面板 / 语音）
+# 微信桥没做（原因见 README「为什么没有做微信接入」），所以没有它的依赖文件。
+#
+# 安装： python -m pip install -r requirements.txt
+
+httpx>=0.27
+edge-tts>=6.1.9
+numpy>=1.26
+# >=0.13 才稳定捆绑带 MP3 解码的 libsndfile（语音模块实测依赖它，否则要装 ffmpeg）
+soundfile>=0.13
+fastapi>=0.110
+uvicorn>=0.29
+# 可选：原生桌面窗口。注意它依赖 pythonnet，而 pythonnet 目前不支持 Python 3.14，
+# 所以在 3.14 上装不上也用不了——应用会自动改用 Edge/Chrome 的无边框应用窗口。
+pywebview>=5.0
+# 可选：把 VoiceChanger 里逐样本的 Python 滤波循环换成向量化实现。
+# 实测在 12s 语音上综合耗时约 4~5s（约 2.4~3.1 倍速），**当前并非瓶颈**，
+# 所以不是必需项；只有在明显更慢的机器上才值得考虑。
+scipy>=1.11
+faster-whisper>=1.0   # 语音识别（没字幕时直接听视频声音）
+av>=12.0              # 解 M4A/AAC（soundfile 不支持 AAC，用它自带的 ffmpeg）
+# 一起听音乐：网易云的 weapi 要 AES-128-CBC + RSA，用它实现加密登录。
+# 同时 qrcode（生成登录二维码）也依赖它——没有 PIL 时只能出 SVG，正好够用。
+pycryptodome>=3.20
+qrcode>=7.4
